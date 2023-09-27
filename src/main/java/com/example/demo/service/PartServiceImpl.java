@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.Part;
-import com.example.demo.domain.Product;
 import com.example.demo.repositories.PartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +34,15 @@ public class PartServiceImpl implements PartService{
             return partRepository.search(keyword);
         }
         return (List<Part>) partRepository.findAll();
+    }
+    @Override
+    public Part findByName(String name){
+        Optional<Part> result= partRepository.findByName(name);
+        Part thePart=null;
+        if(result.isPresent()){
+            thePart=result.get();
+        }
+        return thePart;
     }
     @Override
     public Part findById(int theId) {

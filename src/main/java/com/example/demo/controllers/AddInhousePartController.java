@@ -37,18 +37,34 @@ public class AddInhousePartController{
     }
 
     @PostMapping("/showFormAddInPart")
-    public String submitForm(@Valid @ModelAttribute("inhousepart") InhousePart part, BindingResult theBindingResult, Model theModel){
-        theModel.addAttribute("inhousepart",part);
-        if(theBindingResult.hasErrors()){
-            return "InhousePartForm";
-        }
-        else{
-        InhousePartService repo=context.getBean(InhousePartServiceImpl.class);
-        InhousePart ip=repo.findById((int)part.getId());
-        if(ip!=null)part.setProducts(ip.getProducts());
-            repo.save(part);
+    public String submitForm(@Valid @ModelAttribute("inhousepart") InhousePart part, BindingResult theBindingResult, Model theModel) {
+        theModel.addAttribute("inhousepart", part);
 
-        return "confirmationaddpart";}
+        if (theBindingResult.hasErrors()) {
+            return "InhousePartForm";
+        } else {
+            PartService repo2 = context.getBean(PartServiceImpl.class);
+
+            Part existingPart = repo2.findById((int) part.getId());
+
+            if (existingPart == null) {
+                InhousePartService repo = context.getBean(InhousePartServiceImpl.class);
+                InhousePart ip = repo.findById((int) part.getId());
+                if (ip != null) {
+                    part.setProducts(ip.getProducts());
+                }
+                repo.save(part);
+            } else {
+                existingPart.setName(part.getName());
+                existingPart.setPrice(part.getPrice());
+                existingPart.setInv(part.getInv());
+
+                repo2.save(existingPart);
+            }
+
+            return "confirmationaddpart";
+        }
     }
+
 
 }

@@ -52,41 +52,49 @@ public class AddProductController {
     public String submitForm(@Valid @ModelAttribute("product") Product product, BindingResult bindingResult, Model theModel) {
         theModel.addAttribute("product", product);
 
-        if(bindingResult.hasErrors()){
-            ProductService productService = context.getBean(ProductServiceImpl.class);
-            Product product2=productService.findById((int)product.getId());
-            theModel.addAttribute("parts", partService.findAll());
-            List<Part>availParts=new ArrayList<>();
-            for(Part p: partService.findAll()){
-                if(!product2.getParts().contains(p))availParts.add(p);
-            }
-            theModel.addAttribute("availparts",availParts);
-            theModel.addAttribute("assparts",product2.getParts());
+        // Check if a product with the same name already exists
+        ProductService productService = context.getBean(ProductServiceImpl.class);
+        Product existingProduct = productService.findByName(product.getName());
+
+        if (existingProduct != null && (product.getId() == 0 || product.getId() != existingProduct.getId())) {
+            String alertMessage = "A Product with this name already exists.";
+            String script = String.format("alert('%s');", alertMessage);
+            theModel.addAttribute("javascript", script); // Add the script to the model
+            bindingResult.rejectValue("name", "error.product", alertMessage);
             return "productForm";
         }
- //       theModel.addAttribute("assparts", assparts);
- //       this.product=product;
-//        product.getParts().addAll(assparts);
-        else {
+
+        if (bindingResult.hasErrors()) {
+            List<Part> availParts = new ArrayList<>();
+            for (Part p : partService.findAll()) {
+                if (!product.getParts().contains(p)) {
+                    availParts.add(p);
+                }
+            }
+            theModel.addAttribute("parts", partService.findAll());
+            theModel.addAttribute("availparts", availParts);
+            theModel.addAttribute("assparts", product.getParts());
+            return "productForm";
+        } else {
             ProductService repo = context.getBean(ProductServiceImpl.class);
-            if(product.getId()!=0) {
+            if (product.getId() != 0) {
                 Product product2 = repo.findById((int) product.getId());
                 PartService partService1 = context.getBean(PartServiceImpl.class);
-                if(product.getInv()- product2.getInv()>0) {
+                if (product.getInv() - product2.getInv() > 0) {
                     for (Part p : product2.getParts()) {
                         int inv = p.getInv();
                         p.setInv(inv - (product.getInv() - product2.getInv()));
                         partService1.save(p);
                     }
                 }
-            }
-            else{
+            } else {
                 product.setInv(0);
             }
             repo.save(product);
             return "confirmationaddproduct";
         }
     }
+
 
     @GetMapping("/showProductFormForUpdate")
     public String showProductFormForUpdate(@RequestParam("productID") int theId, Model theModel) {

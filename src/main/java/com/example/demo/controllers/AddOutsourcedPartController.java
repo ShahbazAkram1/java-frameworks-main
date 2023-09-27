@@ -40,14 +40,27 @@ public class AddOutsourcedPartController {
     @PostMapping("/showFormAddOutPart")
     public String submitForm(@Valid @ModelAttribute("outsourcedpart") OutsourcedPart part, BindingResult bindingResult, Model theModel){
         theModel.addAttribute("outsourcedpart",part);
+        PartService repo2 = context.getBean(PartServiceImpl.class);
+        Part existingPart = repo2.findByName(part.getName());
+        System.out.println("ExistingPart= "+existingPart);
+        if(existingPart!=null){
+            String alertMessage = "A part with this name already exists.";
+            String script = String.format("alert('%s');", alertMessage);
+            theModel.addAttribute("javascript", script); // Add the script to the model
+            bindingResult.rejectValue("name","error.outsourcepart",alertMessage);
+            return "InhousePartForm";
+        }
         if(bindingResult.hasErrors()){
             return "OutsourcedPartForm";
         }
         else{
         OutsourcedPartService repo=context.getBean(OutsourcedPartServiceImpl.class);
         OutsourcedPart op=repo.findById((int)part.getId());
-        if(op!=null)part.setProducts(op.getProducts());
-            repo.save(part);
+        if(op!=null) {
+            part.setProducts(op.getProducts());
+        }
+        repo.save(part);
+
         return "confirmationaddpart";}
     }
 

@@ -30,7 +30,15 @@ public class ProductServiceImpl implements ProductService{
     public List<Product> findAll() {
         return (List<Product>) productRepository.findAll();
     }
-
+    @Override
+    public Product findByName(String name){
+        Optional<Product> result= productRepository.findByName(name);
+        Product theProduct=null;
+        if(result.isPresent()){
+            theProduct=result.get();
+        }
+        return theProduct;
+    }
     @Override
     public Product findById(int theId) {
         Long theIdl=(long)theId;
