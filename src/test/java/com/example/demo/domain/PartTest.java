@@ -2,7 +2,10 @@ package com.example.demo.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,10 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PartTest {
     Part partIn;
     Part partOut;
+    private Validator validator;
     @BeforeEach
     void setUp() {
         partIn=new InhousePart();
         partOut=new OutsourcedPart();
+        validator = new LocalValidatorFactoryBean();
+        ((LocalValidatorFactoryBean) validator).afterPropertiesSet();
     }
     @Test
     void getId() {
@@ -155,5 +161,22 @@ class PartTest {
         partIn.setId(1l);
         partOut.setId(1l);
         assertEquals(partIn.hashCode(),partOut.hashCode());
+    }
+    @Test
+    public void testValidMaximumInventory() {
+        InhousePart inhousePart = new InhousePart();
+        inhousePart.setMaxInventory(100);
+        Set<ConstraintViolation<InhousePart>> violations = validator.validate(inhousePart);
+        assertEquals(0, violations.size());
+    }
+
+    @Test
+    public void testInvalidMinimumInventory() {
+        InhousePart inhousePart = new InhousePart();
+        inhousePart.setMinInventory(-10);
+        Set<ConstraintViolation<InhousePart>> violations = validator.validate(inhousePart);
+        assertEquals(1, violations.size());
+        ConstraintViolation<InhousePart> violation = violations.iterator().next();
+        assertEquals("Minimum inventory must be non-negative", violation.getMessage());
     }
 }
