@@ -12,12 +12,9 @@ import java.util.Optional;
 
 /**
  *
- *
- *
- *
  */
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
     @Autowired
@@ -30,26 +27,27 @@ public class ProductServiceImpl implements ProductService{
     public List<Product> findAll() {
         return (List<Product>) productRepository.findAll();
     }
+
     @Override
-    public Product findByName(String name){
-        Optional<Product> result= productRepository.findByName(name);
-        Product theProduct=null;
-        if(result.isPresent()){
-            theProduct=result.get();
+    public Product findByName(String name) {
+        Optional<Product> result = productRepository.findByName(name);
+        Product theProduct = null;
+        if (result.isPresent()) {
+            theProduct = result.get();
         }
         return theProduct;
     }
+
     @Override
     public Product findById(int theId) {
-        Long theIdl=(long)theId;
+        Long theIdl = (long) theId;
         Optional<Product> result = productRepository.findById(theIdl);
 
         Product theProduct = null;
 
         if (result.isPresent()) {
             theProduct = result.get();
-        }
-        else {
+        } else {
             // we didn't find the product id
             throw new RuntimeException("Did not find part id - " + theId);
         }
@@ -65,13 +63,36 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public void deleteById(int theId) {
-        Long theIdl=(long)theId;
+        Long theIdl = (long) theId;
         productRepository.deleteById(theIdl);
     }
-    public List<Product> listAll(String keyword){
-        if(keyword !=null){
+
+    public List<Product> listAll(String keyword) {
+        if (keyword != null) {
             return productRepository.search(keyword);
         }
         return (List<Product>) productRepository.findAll();
     }
+
+    @Override
+    public String buyProduct(int productId) {
+        Optional<Product> optionalProduct = productRepository.findById((long) productId);
+
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+
+            if (product.getInv() > 0) {
+                // Decrement the product's inventory by one
+                product.setInv(product.getInv() - 1);
+                productRepository.save(product);
+                return "Purchase successful!";
+            } else {
+                return "Product is out of stock!";
+            }
+        } else {
+            return "Product not found!";
+
+        }
+    }
+
 }

@@ -19,5 +19,6 @@ public interface ProductService {
     public void deleteById(int theId);
     Product findByName(String name);
     public List<Product> listAll(String keyword);
+    public String buyProduct(int productId);
 
 }
