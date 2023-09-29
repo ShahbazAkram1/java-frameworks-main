@@ -22,6 +22,9 @@
     <p><input type="text" path="inv" th:field="*{inv}" placeholder="Part Inventory" class="form-control mb-4 col-4"/></p> <!-- Modified placeholder text -->
     <p th:if="${#fields.hasErrors('inv')}" th:errors="*{inv}">Inventory Error</p>
 
+    <p><input type="text" th:field="*{maxInventory}" placeholder="Max Inventory" class="form-control mb-4 col-4"/></p>
+    <p><input type="text" th:field="*{minInventory}" placeholder="Min Inventory" class="form-control mb-4 col-4"/></p>
+
     <p><input type="text" th:field="*{partId}" placeholder="Part ID" class="form-control mb-4 col-4"/></p>
 
     <p><input type="submit" value="Submit" /></p>
