@@ -37,6 +37,7 @@ public class AddOutsourcedPartController {
         return "OutsourcedPartForm";
     }
 
+
     @PostMapping("/showFormAddOutPart")
     public String submitForm(@Valid @ModelAttribute("outsourcedpart") OutsourcedPart part, BindingResult bindingResult, Model theModel) {
         theModel.addAttribute("outsourcedpart", part);
@@ -46,7 +47,7 @@ public class AddOutsourcedPartController {
         if (existingPart != null) {
             String alertMessage = "A part with this name already exists.";
             String script = String.format("alert('%s');", alertMessage);
-            theModel.addAttribute("javascript", script); // Add the script to the model
+            theModel.addAttribute("javascript", script); //
             bindingResult.rejectValue("name", "error.outsourcepart", alertMessage);
             return "OutsourcedPartForm";
         }
