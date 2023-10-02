@@ -1,8 +1,11 @@
 package com.example.demo.controllers;
 
 import com.example.demo.domain.InhousePart;
+import com.example.demo.domain.Part;
 import com.example.demo.service.InhousePartService;
 import com.example.demo.service.InhousePartServiceImpl;
+import com.example.demo.service.PartService;
+import com.example.demo.service.PartServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -36,6 +39,16 @@ public class AddInhousePartController {
     @PostMapping("/showFormAddInPart")
     public String submitForm(@Valid @ModelAttribute("inhousepart") InhousePart part, BindingResult theBindingResult, Model theModel) {
         theModel.addAttribute("inhousepart", part);
+        PartService repo2 = context.getBean(PartServiceImpl.class);
+        Part existingPart = repo2.findByName(part.getName());
+        System.out.println("ExistingPart= "+existingPart);
+        if(existingPart!=null){
+            String alertMessage = "A part with this name already exists.";
+            String script = String.format("alert('%s');", alertMessage);
+            theModel.addAttribute("javascript", script); // Add the script to the model
+            theBindingResult.rejectValue("name","error.inhousepart",alertMessage);
+            return "InhousePartForm";
+        }
         if (theBindingResult.hasErrors()) {
             return "InhousePartForm";
         } else {
