@@ -14,14 +14,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 
 /**
- *
- *
- *
  *
  */
 @Controller
@@ -37,18 +33,26 @@ public class AddInhousePartController {
     }
 
     @PostMapping("/showFormAddInPart")
-    public String submitForm(@Valid @ModelAttribute("inhousepart") InhousePart part, BindingResult theBindingResult, Model theModel) {
+    public String submitForm(
+            @Valid @ModelAttribute("inhousepart") InhousePart part,
+            BindingResult theBindingResult,
+            Model theModel) {
+
         theModel.addAttribute("inhousepart", part);
-        PartService repo2 = context.getBean(PartServiceImpl.class);
-        Part existingPart = repo2.findByName(part.getName());
-        System.out.println("ExistingPart= "+existingPart);
-        if(existingPart!=null){
-            String alertMessage = "A part with this name already exists.";
-            String script = String.format("alert('%s');", alertMessage);
-            theModel.addAttribute("javascript", script); // Add the script to the model
-            theBindingResult.rejectValue("name","error.inhousepart",alertMessage);
-            return "InhousePartForm";
+
+        if (part.getPartId() == 0) {
+            PartService repo2 = context.getBean(PartServiceImpl.class);
+            Part existingPart = repo2.findByName(part.getName());
+            System.out.println("ExistingPart= " + existingPart);
+            if (existingPart != null) {
+                String alertMessage = "A part with this name already exists.";
+                String script = String.format("alert('%s');", alertMessage);
+                theModel.addAttribute("javascript", script); // Add the script to the model
+                theBindingResult.rejectValue("name", "error.inhousepart", alertMessage);
+                return "InhousePartForm";
+            }
         }
+
         if (theBindingResult.hasErrors()) {
             return "InhousePartForm";
         } else {
@@ -64,15 +68,18 @@ public class AddInhousePartController {
             InhousePartService repo = context.getBean(InhousePartServiceImpl.class);
             InhousePart ip = repo.findById((int) part.getId());
             if (ip != null) {
-                part.setProducts(ip.getProducts());
+                ip.setName(part.getName());
+                ip.setInv(part.getInv());
+                ip.setMinInventory(part.getMinInventory());
+                ip.setMaxInventory(part.getMaxInventory());
+                repo.save(ip);
+            } else {
+                repo.save(part);
             }
-            repo.save(part);
 
             return "confirmationaddpart";
         }
     }
-
-
 
 
 }
